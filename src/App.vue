@@ -1,13 +1,17 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <common-header></common-header>
     <router-view/>
   </div>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
+import CommonHeader from 'components/common_header/common_header'
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    CommonHeader
+  }
 }
 </script>
 
@@ -18,6 +22,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  left: 0;
 }
 </style>
