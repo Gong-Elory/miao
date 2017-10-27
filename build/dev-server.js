@@ -22,6 +22,18 @@ const autoOpenBrowser = !!config.dev.autoOpenBrowser
 const proxyTable = config.dev.proxyTable
 
 const app = express()
+
+const apiRoutes = express.Router()
+apiRoutes.get('/getStoryList/:id',function(req, res){
+  let url = `../src/mock/storyList.json`
+  if(req.params.id) {
+    url = `../src/mock/storyList${req.params.id}.json`
+  }
+  const story = require(url)
+  res.json(story)
+})
+app.use(apiRoutes)
+
 const compiler = webpack(webpackConfig)
 
 const devMiddleware = require('webpack-dev-middleware')(compiler, {
@@ -75,6 +87,8 @@ var readyPromise = new Promise((resolve, reject) => {
   _reject = reject
 })
 
+
+
 var server
 var portfinder = require('portfinder')
 portfinder.basePort = port
@@ -96,7 +110,6 @@ devMiddleware.waitUntilValid(() => {
     _resolve()
   })
 })
-
 module.exports = {
   ready: readyPromise,
   close: () => {

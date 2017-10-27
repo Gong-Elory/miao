@@ -6,6 +6,9 @@
     <router-link class="tab-item" to="/music">
       <span class="tab-link">音乐</span>
     </router-link>
+    <router-link class="player" to="/player">
+      <i class="fa fa-music" aria-hidden="true"></i>
+    </router-link>
   </div>
 </template>
 <script type="text/ecmascript-6"></script>
@@ -21,7 +24,7 @@
   .tab {
     padding: 0 90px;
     display: flex;
-    font-size: $font-size-medium;
+    font-size: $font-size-medium-x;
     .tab-item {
       flex: 1;
       text-align: center;
@@ -31,6 +34,11 @@
         color: $color-text;
         font-weight: 800
       }
+    }
+    .player{
+      position: absolute;
+      right: 20px;
+      color:#fff;
     }
   }
 </style>

@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <common-header></common-header>
-    <router-view/>
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
@@ -17,7 +19,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: FZLTXIHJW--GB1-0, "hiragino sans gb", "Microsoft YaHei", "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -27,5 +29,6 @@ export default {
   top: 0;
   right: 0;
   left: 0;
+  background-color: #f5f5f5;
 }
 </style>

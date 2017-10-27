@@ -5,18 +5,19 @@
 </template>
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll'
+  import Loading from 'common/loading/loading'
+  
   export default {
-    import BScroll from 'better-scroll'
-    import {ajax} from 'base/js/util'
     mounted() {
       this.$nextTick(() => {
-        _initialScroll()
+        this._initialScroll()
+        this.refresh()
       })
     },
     props: {
       data: {
         type: Array,
-        default: false
+        default: []
       },
       click: {
         type: Boolean,
@@ -33,8 +34,11 @@
       interface: {
         type: String,
         default: ''
+      },
+      isRefresh: {
+        type: Boolean,
+        default: false
       }
-
     },
     methods: {
       _initialScroll() {
@@ -49,10 +53,11 @@
         
         if (this.pullDownRefresh) {
           this.scroll.on('pullingDown', ()=> {
-            /* 下拉刷新获取数据 */
-            this._RefreshData().then((newData) => {
-              this.$emit('pullingDown', newData)
-            })
+            this.$emit('pullingDown')
+          })
+
+          this.scroll.on('scroll', (pos) => {
+              this.$emit('scroll', pos)
           })
         }
 
@@ -71,11 +76,6 @@
       },
       scrollToElement() {
         this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
-      },
-      _RefreshData() {
-        if (this.interface) {
-          ajax(this.interface)
-        }
       }
     },
     watch: {
