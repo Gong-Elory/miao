@@ -4,15 +4,18 @@
     <keep-alive>
       <router-view/>
     </keep-alive>
+    <music-detail></music-detail>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import CommonHeader from 'components/common_header/common_header'
+import MusicDetail from 'components/music-detail/music-detail'
 export default {
   name: 'app',
   components: {
-    CommonHeader
+    CommonHeader,
+    MusicDetail
   }
 }
 </script>

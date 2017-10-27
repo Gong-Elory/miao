@@ -1,7 +1,7 @@
 <template>
   <div class="story-panel">
     <loading v-if="loading" title="更新动态..." class="loading"></loading>
-    <scroll :pullDownRefresh="pullDownRefresh" @pullingDown="refreshData" :data="newStory" class="story-wrapper" @scroll="scroll" 
+    <scroll :pullDownRefresh="pullDownRefresh" @pullingDown="refreshData" :data="contentList" class="story-wrapper" @scroll="scroll" 
     :isRefresh="isRefresh"  ref="scroll">
       <ul class="story-list">
         <li class="item" v-for="(item, index) in contentList">
@@ -9,15 +9,15 @@
             <div class="author-desc">
               <img :src="item.avator" height="40" width="40" alt="" class="avator"/>
               <span class="name" v-text="item.author"></span>
-              <span class="timestamp" v-text="item.timestamp">昨天 21:20</span>
+              <span class="timestamp" v-text="item.timestamp"></span>
             </div>
             <div class="comment-wrapper">
               <p class="comment" v-html="item.comment"></p>
             </div>
             <div class="music-panel">
-              <div class="music-img">
+              <div class="music-img" @click="playMusic(item.song)">
                 <img :src="item.song.songimage" height="60" width="60" alt="" class="music-icon" />
-                <i class="fa fa-play-circle-o"></i>
+                <i class="fa" :class="[(nowPlay == item.song) ? 'fa-stop-circle-o' : 'fa-play-circle-o']"></i>
               </div>
               <div class="song-content">
                 <p class="songName" v-html="item.song.songname"></p>
@@ -44,8 +44,8 @@
   import Scroll from 'common/scroll/scroll'
   import {ajax, tips, getSong, formatDate} from 'base/js/util'
   import Loading from 'common/loading/loading'
-  import axios from 'axios'
   import {MSG_OK} from 'base/js/config'
+  import {mapActions, mapGetters} from 'vuex'
 
   let link = {
     url: '/getStoryList/1',
@@ -68,17 +68,33 @@
         contentList: [],
         maxIndex: 0,
         nowIndex: 1,
-        isRefresh: false
+        isRefresh: false,
+        nowPlay: {}
       }
     },
     created() {
       this._getStoryData()
+    },
+    mounted() {
     },
     components: {
       Scroll,
       Loading
     },
     methods: {
+      playMusic(song) {
+        this.nowPlay = song;
+        let songList = [];
+        songList.push(song)
+        this.selectPlay({
+          list: songList,
+          index: 0,
+          isFullScreen: false
+        })
+      },
+      ...mapActions([
+        'selectPlay'
+      ]),
       refreshData() {
         if (link) {
           if (this.nowIndex++) {
@@ -122,12 +138,23 @@
             this.isRefresh = true
           }
         }, 2000)
-        
       }
     },
     computed: {
-      newStory() {
-        return this.contentList
+      ...mapGetters([
+        'fullScreen',
+        'playing',
+        'currentIndex',
+        'palylist',
+        'sequenceList',
+        'currentSong'
+      ])
+    },
+    watch: {
+      playing(newVal) {
+        if ( !newVal) {
+          this.nowPlay = {}
+        }
       }
     }
   }
@@ -136,7 +163,6 @@
   @import '~base/style/variables.scss';
   .loading {
     position: absolute;
-    top: 40px;
   }
   .story-wrapper{
     overflow: hidden;
@@ -144,9 +170,10 @@
     height: 100%;
   }
   .story-panel{
-    overflow: hidden;
+    position: fixed;
+    top: 40px;
+    bottom: 0;
     width: 100%;
-    height: calc(100% - 40px);
   }
 
   .item{
@@ -209,7 +236,7 @@
             color: #f00;
           }
         }
-        .fa-play-circle-o, .fa-pause-circle-o{
+        .fa-play-circle-o, .fa-stop-circle-o{
           position: absolute;
           bottom: 5px;
           right: 5px;

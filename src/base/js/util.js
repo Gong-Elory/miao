@@ -47,6 +47,7 @@ export function formatDate(timestamp) {
   let nowDate = new Date()
   let month = date.getMonth() + 1
   let year  = date.getFullYear() 
+  let nyear  = nowDate.getFullYear() 
   let day   = date.getDate()
   let nday   = nowDate.getDay()
   let prefix
@@ -54,6 +55,8 @@ export function formatDate(timestamp) {
     prefix = '昨天'
   } else if ((nday- day) == 2) {
     prefix = '前天'
+  } else if (year == nyear) {
+    prefix = `${month}-${day}`
   } else {
     prefix = `${year}-${month}-${day}`
   }

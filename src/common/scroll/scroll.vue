@@ -9,9 +9,9 @@
   
   export default {
     mounted() {
+      console.log('moutee')
       this.$nextTick(() => {
         this._initialScroll()
-        this.refresh()
       })
     },
     props: {
@@ -60,7 +60,6 @@
               this.$emit('scroll', pos)
           })
         }
-
       },
       enable() {
         this.scroll && this.scroll.enable()
@@ -80,9 +79,9 @@
     },
     watch: {
       data() {
-        this.$nextTick(() => {
+        setTimeout(() => {
           this.refresh()
-        })
+        }, 20)
       }
     }
   }
