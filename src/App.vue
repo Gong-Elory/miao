@@ -1,23 +1,34 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <common-header></common-header>
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
+import CommonHeader from 'components/common_header/common_header'
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    CommonHeader
+  }
 }
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: FZLTXIHJW--GB1-0, "hiragino sans gb", "Microsoft YaHei", "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  left: 0;
+  background-color: #f5f5f5;
 }
 </style>
