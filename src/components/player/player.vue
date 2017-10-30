@@ -1,25 +1,28 @@
 <template>
-  <div class="player-wrapper">
+  <div class="player-wrapper" @click.prevent.stop="toggleShow">
       <div class="normal-players" v-show="fullScreen">
         <div class="music-background"><!-- 音乐背景 -->
-            <img src="https://y.gtimg.cn/music/photo_new/T001R300x300M0000020PeOh4ZaCw1.jpg?max_age=2592000" class="cd-img">
+            <img :src="currentSong.songimage" class="cd-img">
         </div>
-        <div class="operator-panel">
+        <div class="operator-panel" v-show="show">
           <div class="icon-wrapper">
-            <p class="lyric-panel">是国内人气最高的网页设计师学习平台</p>
+            <!-- <p class="lyric-panel">是国内人气最高的网页设计师学习平台</p> -->
           </div>
           <div class="progress-panel">
-            <span class="nowtime time">03:20</span>
+            <span class="nowtime time" v-text="nowtime"></span>
               <div class="progress-bar-wrapper">
-                <progress-bar></progress-bar>
+                <progress-bar :percent="percent" @percentchange="changePercent"></progress-bar>
               </div>
-            <span class="duration time">04:20</span>
+            <span class="duration time" v-text="endtime"></span>
           </div>
         </div>
-        <div class="icon-play"><i class="fa fa-play-circle-o"></i></div>
+        <div class="icon-play" 
+          v-show="show" 
+          @click.stop="togglePause">
+          <i class="fa" :class="[this.pause ? 'fa-play-circle-o': 'fa-pause-circle-o']"></i></div>
       </div>
       
-      <audio :src="currentSong.songlink" autoplay  @ended="end"></audio>
+      <audio :src="currentSong.songlink"  autoplay="autoplay" @ended="end" ref="audio" @timeupdate="timeupdate"></audio>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -29,11 +32,43 @@
     components:{
       ProgressBar
     },
+    data() {
+      return {
+        show: true,
+        pause: false,
+        currentTime: 0
+      }
+    },
     methods: {
       end() {
         let index = this.currentIndex + 1
         if (!this.playlist[index]) {
           this.setPlayingFlag(false)
+          this.$refs.audio.currentTime = 0
+        }
+      },
+      toggleShow() {
+        this.show = !this.show
+      },
+      togglePause() {
+        this.pause = !this.pause
+        this.setPlayingFlag(!this.pause)
+        this.pause ? this.$refs.audio.pause() : this.$refs.audio.play()
+      },
+      timeupdate(e) {
+        this.currentTime = e.target.currentTime
+      },
+      formatime(interval) {
+        interval = Math.floor(interval)
+        let m = Math.floor(interval / 60)
+        let s = interval % 60
+        return `${(''+m).padStart(2,'0')}:${(''+s).padStart(2,'0')}`
+      },
+      changePercent(percent) {
+        const ctime = this.currentSong.interval * percent
+        this.$refs.audio.currentTime = ctime
+        if (!this.playing) {
+          this.setPlayingFlag(true)
         }
       },
       ...mapMutations({
@@ -52,7 +87,24 @@
         'playlist',
         'sequenceList',
         'currentSong'
-      ])
+      ]),
+      endtime() {
+        return this.formatime(this.currentSong.interval)
+      },
+      nowtime() {
+        return this.formatime(this.currentTime)
+      },
+      percent() {
+        return this.currentTime / this.currentSong.interval
+      }
+    },
+    watch: {
+      playing(newVal) {
+        this.$nextTick(() => {
+          this.pause = !newVal
+          this.pause ? this.$refs.audio.pause() : this.$refs.audio.play()
+        })  
+      }
     }
   }
 </script>
@@ -86,7 +138,7 @@
       .fa{
         font-size: 40px;
         color: #fff;
-        opacity: 0.3;
+        opacity: 0.5;
       }
     }
     .operator-panel{
@@ -94,6 +146,7 @@
       bottom: 0;
       height: 80px;
       width: 100%;
+      background:-webkit-gradient(linear, 0 bottom, 0 0, from(rgba(0, 0, 0, 0.4)), to(transparent));
       .icon-wrapper{
         top: 0;
         height: 40px;

@@ -1,64 +1,69 @@
 <template>
-  <scroll class="music-detail-wrapper" :data="happy" v-show="fullScreen" ref="scroll">
-    <div>
-      <div class="head-operator">
-        <div class="back"><i class="fa fa-chevron-left"></i></div>
-        <h1 class="title">追光者</h1>
+  <transition name="player">
+    <div v-show="fullScreen" class="music-container">
+      <div class="head-operator" ref="opr">
+        <div class="back"><i class="fa fa-chevron-left" @click="back"></i></div>
+        <h1 class="title" v-text="currentSong.songname"></h1>
       </div>
-      <div class="music-wrapper">
-        <div class="music-content">
-          <player></player>
-          <div class="singer-detail">
-            <div class="avatar">
-              <img src="http://q.qlogo.cn/qqapp/101426977/DE9EEE7D0F09FFEB5FF2FA4232D7AF7A/40" height="40" width="40" alt="" class="singer-avator">
+      <scroll class="music-detail-wrapper" :data="playlist"  ref="scroll" @scroll="fixedTitle" :probeType="3">
+        <div ref="slide">
+          <div class="music-wrapper" >
+            <div class="music-content">
+              <player></player>
+              <div class="singer-detail">
+                <div class="avatar">
+                  <img :src="currentSong.songimage" class="singer-avator">
+                </div>
+                <div class="singer-intro">
+                  <span class="name" v-text="currentSong.singer"></span>
+                </div>
+                <div class="follow">
+                  <i class="fa fa-plus"></i>
+                  <span>关注他</span>
+                </div>
+              </div>
             </div>
-            <div class="singer-intro">
-              <span class="name">薛之谦</span>
-            </div>
-          </div>
+            <comment-list></comment-list>
+          </div>  
         </div>
-        
-      </div>  
+      </scroll>
     </div>
-  </scroll>
+  </transition>
 </template>
 <script type="text/ecmascript-6">
   import Scroll from 'common/scroll/scroll'
   import Player from 'components/player/player'
-  import {mapGetters, mapMutations} from 'vuex'
+  import CommentList from 'common/comment-list/comment-list'
+  import {playlistMixin} from 'base/js/mixin'
   export default {
+    mixins: [playlistMixin],
     components: {
       Scroll,
-      Player
+      Player,
+      CommentList
     },
-    data() {
+    data(){
       return {
-        happy: []
+        songCache: {}
       }
     },
-    mounted() {
-      setTimeout(() => {
-        this.happy = [1,2,3]
-      }, 3000)
-    },
-    computed: {
-      ...mapGetters([
-        'fullScreen',
-        'playing',
-        'currentIndex',
-        'playlist',
-        'sequenceList',
-        'currentSong'
-      ])
+    methods: {
+      back() {
+        this.setFullScreen(false)
+      },
+      fixedTitle(pos){
+        if( pos.y < -50 ) {
+          this.$refs.opr.style.background = `rgba(32,206,197,${Math.min(1, pos.y/-300)})`
+        } else {
+          this.$refs.opr.style.background = '-webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0, 0, 0, 0.3)), to(transparent))'
+        }
+      }
     },
     watch: {
-      fullScreen(newVal) {
-        if(newVal) {
-
-          setTimeout(() => {
-            this.$refs.scroll.refresh()
-          }, 20)
-        }
+      currentSong(newVal) {
+         if (newVal != this.songCache) {
+          this.$refs.scroll.scroll.scrollTo(0, 0, 100)
+         }
       }
     }
   }
@@ -66,7 +71,13 @@
 <style lang="scss" scoped rel="stylesheet/scss">
 
   @import '~base/style/variables.scss';
-  .music-detail-wrapper{
+  .player-enter-active, .player-leave-active {
+    transition: all 0.4s
+  }
+  .player-enter, .player-leave-to{
+    transform: translate3d(100%, 0, 0)
+  }
+  .music-container{
     position: fixed;
     top: 0;
     bottom: 0;
@@ -76,13 +87,20 @@
     background-color: $default-background-color;
     overflow: hidden;
   }
+  .music-detail-wrapper{
+    height: 100%;
+  }
   .head-operator{
     position: fixed;
+    top: 0;
     z-index: $head-operator;
     width: 100%;
+    background:-webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0, 0, 0, 0.3)), to(transparent));
     .back{
       position: absolute;
-      left: 10px;
+      width: 30px;
+      height: 100%;
+      left: 3px;
       top: 7px;
       .fa-chevron-left{
         color: #fff;
@@ -127,6 +145,16 @@
           flex-direction: column;
           align-items: flex-start;
           justify-content: center;
+        }
+        .follow{
+          flex: 0 0 60px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          color: #5b5b5b;
+          span{
+            font-size: 14px;
+          }
         }
       }
     }

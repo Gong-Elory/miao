@@ -12,7 +12,7 @@
     .desc{
       line-height: 20px;
       font-size: $font-size-small;
-      color: #333;
+      color: #5b5b5b;
     }
   }
     

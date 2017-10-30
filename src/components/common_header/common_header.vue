@@ -6,7 +6,7 @@
     <router-link class="tab-item" to="/music">
       <span class="tab-link">音乐</span>
     </router-link>
-    <a class="player" @click.prevent.stop="setFullMusic">
+    <a class="player" @click.prevent.stop="setFullMusic" v-show="playlist.length">
       <i class="fa fa-music" :class="{active:playing}" aria-hidden="true"></i>
     </a>
   </div>
@@ -16,7 +16,8 @@
   export default {
     computed: {
       ...mapGetters([
-        'playing'
+        'playing',
+        'playlist'
       ])
     },
     methods: {
@@ -57,7 +58,7 @@
       font-weight: 500;
       &.router-link-active {
         color: $color-text;
-        font-weight: 800
+        // font-weight: 700
       }
     }
     .player{

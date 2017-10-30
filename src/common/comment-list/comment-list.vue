@@ -6,8 +6,8 @@
         <div class="custom"><img :src="item.avatar" alt=""></div>
         <div class="comment-panel">
           <span class="name" v-text="item.name"></span>
-          <span class="timestamp" v-text="item.timestamp"></span>
-          <p class="cmment-detail" v-html="item.comment"></p>
+          <span class="timestamp" v-text="formatTime(item.timestamp)"></span>
+          <p class="cmment-detail" v-html="item.content"></p>
         </div>
       </li>
     </ul>
@@ -16,6 +16,7 @@
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex'
   import {ajax, tips, getSong, formatDate} from 'base/js/util'
+  import {MSG_OK} from 'base/js/config'
   export default {
     data() {
       return {
@@ -27,10 +28,41 @@
         type: Number,
         default: -1
       }
-    }
+    },
+    methods: {
+      formatTime(item) {
+        let time = formatDate(item)
+        return time
+      },
+      _getCommentList() {
+        ajax({
+          method: 'get', 
+          url: `/commentList?songid=${this.songid}`, 
+          asyn: true
+        }).then((comment) => {
+          try{
+            let o_comment = JSON.parse(comment)
+            if (o_comment.status == MSG_OK) {
+              this.commentList = o_comment.list
+              this.$emit('hasCommentList', o_comment.list)
+            }
+          } catch(e) {
+            tips(e)
+          }
+        })
+      }
+    },
+    computed: {
+      ...mapGetters([
+        'currentSong'
+      ])
+    },
     watch: {
-      songid() {
-        ajax()
+      currentSong() {
+        this._getCommentList()
+      },
+      songid(newVal) {
+        this._getCommentList()
       }
     }
   }

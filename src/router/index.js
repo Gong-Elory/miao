@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Stories from 'components/storys/stories'
-import MusicDetail from 'components/music-detail/music-detail'
+import MusicStore from 'components/music-store/music-store'
+import MusicSer from 'components/music-search/music-search'
+import StoriesDetail from 'components/story-detail/story-detail'
 Vue.use(Router)
 
 export default new Router({
@@ -12,7 +14,23 @@ export default new Router({
     },
     {
       path: '/story',
-      component: Stories
+      component: Stories,
+      children: [
+        {
+          path: 'detail/:id',
+          component: StoriesDetail
+        }
+      ]
+    },
+    {
+      path: '/music',
+      component: MusicStore,
+      children: [
+        {
+          path: 'musicser',
+          component: MusicSer
+        }
+      ]
     }
   ]
 })

@@ -15,6 +15,11 @@ const mutaions = {
   },
   [types.SET_SEQUENCE_LIST](state, list) {
     state.sequenceList = list
+  },
+  [types.SET_CURRENT_SONG](state, params) {
+    for(var key in params) {
+      state.playlist[state.currentIndex][key] = params[key]
+    }
   }
 }
 
