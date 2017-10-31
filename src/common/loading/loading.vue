@@ -1,5 +1,5 @@
 <template>
-  <div class="loading">
+  <div>
     <img src="./loading.gif" height="30" width="30" alt="">
     <p class="desc" v-text="title"></p>
   </div>
@@ -12,7 +12,7 @@
     .desc{
       line-height: 20px;
       font-size: $font-size-small;
-      color: #333;
+      color: #5b5b5b;
     }
   }
     

@@ -9,10 +9,9 @@
   
   export default {
     mounted() {
-      this.$nextTick(() => {
+      setTimeout(() => {
         this._initialScroll()
-        this.refresh()
-      })
+      }, 20)
     },
     props: {
       data: {
@@ -55,12 +54,11 @@
           this.scroll.on('pullingDown', ()=> {
             this.$emit('pullingDown')
           })
-
-          this.scroll.on('scroll', (pos) => {
-              this.$emit('scroll', pos)
-          })
         }
-
+        this.scroll.on('scroll', (pos) => {
+          this.$emit('scroll', pos)
+        })
+        this.$emit('hasInit')
       },
       enable() {
         this.scroll && this.scroll.enable()
@@ -80,9 +78,9 @@
     },
     watch: {
       data() {
-        this.$nextTick(() => {
+        setTimeout(() => {
           this.refresh()
-        })
+        }, 20)
       }
     }
   }
