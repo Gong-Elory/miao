@@ -50,7 +50,7 @@
   .tab {
     padding: 0 90px;
     display: flex;
-    font-size: $font-size-medium-x;
+    font-size: $font-size-large;
     .tab-item {
       flex: 1;
       text-align: center;

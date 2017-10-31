@@ -4,6 +4,7 @@ import Stories from 'components/storys/stories'
 import MusicStore from 'components/music-store/music-store'
 import MusicSer from 'components/music-search/music-search'
 import StoriesDetail from 'components/story-detail/story-detail'
+import CommentCommit from 'components/comment-commit/comment-commit'
 Vue.use(Router)
 
 export default new Router({
@@ -31,6 +32,10 @@ export default new Router({
           component: MusicSer
         }
       ]
+    },
+    {
+      path: '/commit',
+      component: CommentCommit
     }
   ]
 })

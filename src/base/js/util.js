@@ -164,3 +164,13 @@ export function isEmpty(obj) {
   }
   return true
 }
+
+export const Store = {
+  setItem(key, value){
+    localStorage.setItem(key, value)
+  },
+  getItem(key){
+    return localStorage.getItem(key)
+  }
+}
+

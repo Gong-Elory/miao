@@ -1,6 +1,7 @@
 <template>
   <div class="story-panel">
     <loading v-show="isload" title="更新动态..." class="loading"></loading>
+    <loading v-if="!contentList.length" title="正在加载..." class="first-load"></loading>
     <scroll :pullDownRefresh="pullDownRefresh" @pullingDown="refreshData" :data="contentList" class="story-wrapper"  
     :isRefresh="isRefresh"  ref="scroll" @scroll="scroll">
       <ul class="story-list">
@@ -14,20 +15,7 @@
             <div class="comment-wrapper">
               <p class="comment" v-html="item.comment"></p>
             </div>
-            <div class="music-panel">
-              <div class="music-img" @click="playMusic(item.song, false, 'icon')">
-                <img :src="item.song.songimage" height="60" width="60" alt="" class="music-icon" />
-                <i class="fa" :class="[(playing && currentSong == item.song)? 'fa-pause-circle-o' : 'fa-play-circle-o']"></i>
-              </div>
-              <div class="song-content" @click="playMusic(item.song, true, 'panel')">
-                <p class="songName" v-html="item.song.songname"></p>
-                <p class="singer" v-html="item.song.singer"></p>
-              </div>
-              <div class="like" @click="countNum(item.song, 'rate', 'youatti')">
-                <i class="fa" :class="[item.song.youatti ? 'fa-heart' : 'fa-heart-o']"></i>
-                <span class="like-num">{{item.song.rate | formatNum}}</span>
-              </div>
-            </div>
+            <music-box :song="item.song" ref="musicbox"></music-box>
             <div class="operator">
               <span><i class="fa fa-like" @click="countNum(item, 'zanNum', 'hasZan')">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><path :fill="item.hasZan ? 'red' : 'gray'" d="m25.857 14.752c-.015.059-1.506 5.867-2.932 8.813-1.162 2.402-3 2.436-3.099 2.436h-12.826v-13c3 0 5.728-4 5.728-7.275 0-3.725 1.433-3.725 2.142-3.725 1.327 0 1.978 1.345 1.978 4 0 2.872-.832 4.525-.839 4.537-.161.31-.155.682.027.981.181.299.5.482.849.482h6.942c.922 0 1.551.215 1.866.64.467.626.286 1.705.164 2.112m-23.857 10.248v-10c0-1.795.659-1.981.855-2h2.145v13h-2.173c-.829 0-.827-.648-.827-1m25.309-13.54c-.713-.969-1.886-1.46-3.482-1.46h-5.519c.26-.932.519-2.285.519-4 0-5.221-2.507-6-4-6-1.909 0-4.185.993-4.185 5.725 0 2.206-1.923 5.275-3.815 5.275h-4-.011c-1.034.011-2.816.862-2.816 4v10.02c0 1.198.675 2.979 2.827 2.979h16.971.035c.364 0 3.224-.113 4.894-3.564 1.514-3.127 3.01-8.942 3.056-9.14.071-.23.664-2.289-.474-3.836"></path></svg>
@@ -45,10 +33,15 @@
 </template>
 <script type="text/ecmascript-6">
   import Scroll from 'common/scroll/scroll'
-  import {ajax, tips, getSong, formatDate, outNum, isEmpty} from 'base/js/util'
+  import {ajax, tips, getSong, formatDate, outNum, isEmpty, Store} from 'base/js/util'
   import Loading from 'common/loading/loading'
   import {MSG_OK} from 'base/js/config'
   import {playlistMixin, numOperate} from 'base/js/mixin'
+  import Vue from 'vue'
+  import {Toast} from 'mint-ui'
+  import MusicBox from 'common/music-box/music-box'
+
+  Vue.component(Toast.name, Toast)
 
   let link = {
     url: '/getStoryList/1',
@@ -65,7 +58,7 @@
     data() {
       return {
         pullDownRefresh: {
-          threshold: 100,
+          threshold: 50,
           stop: 30
         },
         isload: false,
@@ -77,33 +70,22 @@
       }
     },
     created() {
+      if(Store.getItem('stories')){
+        let contentcache = Store.getItem('stories')
+        this.contentList = JSON.parse(contentcache)
+      }
       this._getStoryData()
+      
     },
-    mounted() {
+    beforeDestroy() {
+      Store.setItem('stories',JSON.stringify(this.contentList))
     },
     components: {
       Scroll,
-      Loading
+      Loading,
+      MusicBox
     },
     methods: {
-      playMusic(song, fullScreen, target) {
-        if(this.currentSong == song) {
-          if(fullScreen) {
-            this.setFullScreen(true)
-          }
-          if(target == 'icon') {
-            this.setPlayingFlag(!this.playing)
-          }
-          return
-        }
-        let songList = [];
-        songList.push(song)
-        this.selectPlay({
-          list: songList,
-          index: 0,
-          isFullScreen: (fullScreen ? true : false)
-        })
-      },
       gotoComment(item) {
         this.nowStory = item
         this.$router.push(`/story/detail/${item.mid}`)
@@ -123,72 +105,63 @@
           this.isload = false;
         }
       },
-      _formatStory(newData) {
-        if(newData.status === MSG_OK) {
-          newData.data.list.forEach((item) => {
+      _formatStory(list) {
+          list.forEach((item) => {
             item.timestamp = formatDate(item.timestamp)
             if(item.song instanceof Object) {
               item.song = getSong(item.song)
             }
           })
-          this.contentList = newData.data.list.concat(this.contentList)
-        }  
+          this.contentList = list.concat(this.contentList)
       },
       _getStoryData() {
-        ajax(link).then(newData => {
-          /* 如果有数据传回来则可以回弹到顶部 */
-          try {
-            this._formatStory(JSON.parse(newData))
-            this.isload = false
-          } catch (e) {
-            tips("出错误啦！,请刷新一下")
+        setTimeout(() =>{
+          ajax(link).then(newData => {
+            /* 如果有数据传回来则可以回弹到顶部 */
+            try {
+              let data = JSON.parse(newData)
+              if(data.status === MSG_OK) {
+                this._formatStory(data.data.list)
+                  Toast({
+                  message: `已更新${data.data.list.length}条动态`,
+                  position: 'top',
+                  duration: 600,
+                });
+                this.isload = false
+              } else {
+                Toast({
+                  message: `请求错误`,
+                  position: 'top',
+                  duration: 1000,
+                });
+              }
+            } catch (e) {
+              console.log(e)
+              Toast({
+                message: `出错啦，请重新刷新一下`,
+                position: 'top',
+                duration: 1000,
+              });
+            }
+          }).catch(error => {
+            Toast({
+              message: `已经是最新动态了`,
+              position: 'top',
+              duration: 1500,
+            });
+          })
+          this.isRefresh && this.$refs.scroll.scroll.finishPullDown()
+          if (!this.isRefresh) {
+            this.isRefresh = true
           }
-        }).catch(error => {
-          tips(error)
-        })
-        this.isRefresh && this.$refs.scroll.scroll.finishPullDown()
-        if (!this.isRefresh) {
-          this.isRefresh = true
-        }
-      },
-      /**
-       * [countNum 修改数量]
-       * @param  {[object]} item  [选中的项]
-       * @param  {[number]} count [当前数]
-       * @param  {[boolean]} flag  [是否已经选中]
-       * @return {[type]}       [description]
-       */
-      countNum(item, count, flag){
-        if(item[flag]) {
-          if(item == this.currentSong) {
-            var tmp = {}
-            tmp[flag] = false
-            tmp[count] = item[count]-1
-            this.setCurrentSong(tmp)
-          } else {
-            item[flag] = false
-            item[count] --
-          }
-          
-          // TODO 请求修改后端数据
-        } else {
-          if(item == this.currentSong) {
-            var tmp = {}
-            tmp[flag] = true
-            tmp[count] = item[count] + 1
-            this.setCurrentSong(tmp)
-          } else {
-            item[flag] = true
-            item[count] ++
-          }
-          // TODO 请求修改后端数据
-        }   
+        }, 2000)
       }
     }
   }
 </script>
 <style lang="scss"  rel="stylesheet/scss">
   @import '~base/style/variables.scss';
+  @import '~base/style/common.scss';
   .loading {
     position: absolute;
   }
@@ -220,13 +193,15 @@
           position: absolute;
           right: 10px;
           color: #666;
+          height: 40px;
+          line-height: 40px;
           font-size: $font-size-small;
         }
         .avator{
           border-radius: 50%;
         }
         .name{
-          font-size: $font-size-medium;
+          font-size: 16px;
           margin-left: 8px;
           color: #000;
         }
@@ -237,7 +212,7 @@
           margin-top: 6px;
           margin-bottom: 6px;
           text-align: left;
-          font-size: $font-size-medium;
+          font-size: 16px;
           line-height: 1.5em;
         }
       }

@@ -45,12 +45,13 @@
   }
 </script>
 <style lang="scss" scoped rel="stylesheet/scss">
+  @import '~base/style/variables.scss';
   .search-box{
     position: relative;
     width: 80%;
     margin: 0 auto;
-    height: 30px;
-    line-height: 30px;
+    height: 40px;
+    line-height: 40px;
     display: flex;
     .serach-icon{
       position: absolute;
@@ -65,25 +66,22 @@
       border: none;
       outline: none;
       text-indent: 25px;
-      height: 26px;
+      height: 36px;
       margin-top: 2px;
+      font-size: $font-size-medium;
     }
     .close-icon{
       display: inline-block;
       text-align: center;
-      width: 15px;
-      height: 15px;
-      font-size: 8px;
-      border-radius: 50%;
-      color: #b0abab;
-      position: absolute;
-      top: 50%;
-      margin-top: -7.5px;
+      height: 40px;
+      line-height: 40px;
+      font-size: 12px;
       right: 40px;    
+      color: #888;
+      position: absolute;
       .fa{
-        float: left;
         margin-top: 2px;
-        margin-left: 3px;
+        margin-right: 10px;
       }
     }
     .cancle{

@@ -11,7 +11,7 @@
           <div class="progress-panel">
             <span class="nowtime time" v-text="nowtime"></span>
               <div class="progress-bar-wrapper">
-                <progress-bar :percent="percent" @percentchange="changePercent"></progress-bar>
+                <progress-bar :percent="percent" @percentchange="changePercent" :canplay="audiocanplay"></progress-bar>
               </div>
             <span class="duration time" v-text="endtime"></span>
           </div>
@@ -22,7 +22,7 @@
           <i class="fa" :class="[this.pause ? 'fa-play-circle-o': 'fa-pause-circle-o']"></i></div>
       </div>
       
-      <audio :src="currentSong.songlink"  autoplay="autoplay" @ended="end" ref="audio" @timeupdate="timeupdate"></audio>
+      <audio :src="currentSong.songlink"  @canplay="canplaying" autoplay="autoplay" @ended="end" ref="audio" @timeupdate="timeupdate"></audio>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -36,7 +36,8 @@
       return {
         show: true,
         pause: false,
-        currentTime: 0
+        currentTime: 0,
+        audiocanplay: false
       }
     },
     methods: {
@@ -63,6 +64,9 @@
         let m = Math.floor(interval / 60)
         let s = interval % 60
         return `${(''+m).padStart(2,'0')}:${(''+s).padStart(2,'0')}`
+      },
+      canplaying() {
+        this.audiocanplay = true
       },
       changePercent(percent) {
         const ctime = this.currentSong.interval * percent

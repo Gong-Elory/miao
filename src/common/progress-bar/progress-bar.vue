@@ -6,6 +6,7 @@
       @touchstart.prevent.stop="progressTouchStart" 
       @touchmove.prevent="progressTouchMove" 
       @touchend="progressTouchEnd"><!-- 进度条按钮 -->
+        <i class="fa fa-spinner fa-pulse fa-3x fa-fw" v-show="!canplay"></i>
       </div>
     </div>
   </div>
@@ -17,6 +18,10 @@
       percent: {
         type: Number,
         default: 0
+      },
+      canplay: {
+        type: Boolean,
+        default: false
       }
     },
     created() {
@@ -47,10 +52,12 @@
         this._triggerPercent()
       },
       _moveBtn(offsetWidth) {
+        if(!this.canplay) return
         this.$refs.progress.style.width = `${offsetWidth}px`
         this.$refs.btn.style.left = `${offsetWidth}px`
       },
       _triggerPercent(){
+        if(!this.canplay) return
         const percent =  this.$refs.progress.clientWidth / this.wrapWidth 
         this.$emit('percentchange', percent)
       }
@@ -61,6 +68,9 @@
         if(this.touch.init) return
         this.$refs.progress.style.width = `${this.wrapWidth * newVal}px`
         this.$refs.btn.style.left = `${this.wrapWidth * newVal - btnWidth}px`
+      },
+      canplay(newVal){
+        console.log(newVal)
       }
     }
   }
@@ -89,6 +99,13 @@
         height: 12px;
         border-radius: 50%;
         background-color: $default-color;
+      }
+      .fa-pulse{
+        font-size: 12px;
+        color: #fff;
+        position: absolute;
+        top: 0;
+        left: -1.5px;
       }
     }
   }

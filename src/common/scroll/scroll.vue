@@ -9,9 +9,9 @@
   
   export default {
     mounted() {
-      this.$nextTick(() => {
+      setTimeout(() => {
         this._initialScroll()
-      })
+      }, 20)
     },
     props: {
       data: {
@@ -58,6 +58,7 @@
         this.scroll.on('scroll', (pos) => {
           this.$emit('scroll', pos)
         })
+        this.$emit('hasInit')
       },
       enable() {
         this.scroll && this.scroll.enable()

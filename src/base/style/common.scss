@@ -1,0 +1,20 @@
+@import "~base/style/variables";
+.mint-toast{
+  background-color: rgba(100, 100, 100, 0.7);
+  &.is-placetop{
+    padding: 5px 10px !important;
+    z-index: $story-update-icon;
+  }
+}
+.mint-toast-text{
+  font-size: 14px;
+}
+
+.first-load{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  color: #666;
+}

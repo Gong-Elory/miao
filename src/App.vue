@@ -20,7 +20,8 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss" rel="stylesheet/scss">
+@import "~base/style/common.scss";
 #app {
   font-family: FZLTXIHJW--GB1-0, "hiragino sans gb", "Microsoft YaHei", "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

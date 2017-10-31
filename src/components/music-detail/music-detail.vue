@@ -5,7 +5,7 @@
         <div class="back"><i class="fa fa-chevron-left" @click="back"></i></div>
         <h1 class="title" v-text="currentSong.songname"></h1>
       </div>
-      <scroll class="music-detail-wrapper" :data="playlist"  ref="scroll" @scroll="fixedTitle" :probeType="3">
+      <scroll class="music-detail-wrapper" :data="commentList"  ref="scroll" @scroll="fixedTitle" :probeType="3">
         <div ref="slide">
           <div class="music-wrapper" >
             <div class="music-content">
@@ -23,10 +23,15 @@
                 </div>
               </div>
             </div>
-            <comment-list></comment-list>
+            <comment-list :songid="musicid" @hasCommentList = "getCommentList" :refresh="refresh"></comment-list>
           </div>  
         </div>
       </scroll>
+      <div class="commit-comment" @click="gotoCommitPanel">
+        <span class="icon-wrap">
+          <i class="fa-edit fa"></i>
+        </span>
+      </div>
     </div>
   </transition>
 </template>
@@ -35,6 +40,7 @@
   import Player from 'components/player/player'
   import CommentList from 'common/comment-list/comment-list'
   import {playlistMixin} from 'base/js/mixin'
+  import Bus from 'base/js/eventbus'
   export default {
     mixins: [playlistMixin],
     components: {
@@ -42,9 +48,18 @@
       Player,
       CommentList
     },
+    created() {
+      Bus.$on('updateComentList', (mid) => {  
+        this.refresh = mid
+        console.log('hellomid')
+      });  
+    },
     data(){
       return {
-        songCache: {}
+        songCache: {},
+        musicid: null,
+        commentList: [],
+        refresh: null
       }
     },
     methods: {
@@ -57,13 +72,28 @@
         } else {
           this.$refs.opr.style.background = '-webkit-gradient(linear, 0 0, 0 bottom, from(rgba(0, 0, 0, 0.3)), to(transparent))'
         }
+      },
+      getCommentList(commentlist){
+        this.commentList = commentlist
+        this.refresh = null;
+      },
+      gotoCommitPanel() {
+        this.$router.push('/commit')
       }
     },
     watch: {
       currentSong(newVal) {
          if (newVal != this.songCache) {
+          this.musicid = newVal.songid
           this.$refs.scroll.scroll.scrollTo(0, 0, 100)
          }
+      },
+      fullScreen(newVal) {
+        if(newVal) {
+          this.$nextTick(() => {
+            this.$refs.scroll.scroll.refresh()
+          })
+        }
       }
     }
   }
@@ -101,7 +131,7 @@
       width: 30px;
       height: 100%;
       left: 3px;
-      top: 7px;
+      top: 11px;
       .fa-chevron-left{
         color: #fff;
         font-size: 20px;
@@ -111,9 +141,9 @@
       width: 100%;
       text-align: center;
       color: #fff;
-      font-size: 16px;
-      height: 30px;
-      line-height: 30px;
+      font-size: $font-size-large;
+      height: 40px;
+      line-height: 40px;
     }
   }
   .music-wrapper{
@@ -153,7 +183,7 @@
           justify-content: center;
           color: #5b5b5b;
           span{
-            font-size: 14px;
+            font-size: $font-size-medium;
           }
         }
       }
@@ -195,6 +225,25 @@
           }
         }
       }
+    }
+  }
+  .commit-comment{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: $default-color;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 200;
+    text-align: center;
+    line-height: 50px;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    .fa-edit{
+      color: #fff;
+      font-size: 20px;
+      margin-top: 16px;
+      margin-left: 5px;
     }
   }
 </style>

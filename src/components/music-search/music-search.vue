@@ -1,5 +1,6 @@
 <template>
  <div class="search-result-wrapper">
+    <loading v-if="isSearching" class="first-load" title="正在搜索中..."></loading>
     <scroll :data="queryResult" class="wrapper">
       <ul class="result-list">
         <li class="result-item" v-show="person.id">
@@ -48,12 +49,14 @@
 
   export default {
     components: {
-      Scroll
+      Scroll,
+      Loading
     },
     data(){
       return {
         queryResult: [],
-        person: {}
+        person: {},
+        isSearching: false
       }
     },
     props: {
@@ -69,6 +72,7 @@
           params: params
         }).then((res) => {
           let list = res.data.data
+          this.isSearching = false
           this.formatList(list)
         })
       },
@@ -133,8 +137,8 @@
     },
     watch: {
       query(newVal) {
-        
         if(newVal) {
+          this.isSearching = true
           this.search(newVal)
         } else {
           this.person = {}
@@ -154,15 +158,17 @@
     }
   }
 </script>
-<style lang="scss" rel="stylesheet/scss">
+<style lang="scss" scoped rel="stylesheet/scss">
   @import "~base/style/variables.scss";
-
+  .first-load{
+    top: 40px;
+  }
   .search-result-wrapper{
     position: absolute;
-    top: 30px;
+    top: 40px;
     bottom: 0px;
     width: 100%;
-    background-color: #fff;
+    background-color: #f5f5f5;
     overflow: hidden;
   }
   .wrapper{
@@ -174,6 +180,7 @@
     .result-item{
       position: relative;
       height: 55px;
+      margin: 0 5px;
       padding-left: 56px;
       overflow: hidden;
       .icon{
@@ -201,6 +208,7 @@
         height:55px;
         line-height: 55px;
         text-align: left;
+        color: #000;
       }
       .person-icon{
         position: absolute;

@@ -6,6 +6,7 @@ import store from './store'
 import 'base/style/reset.css'
 import fastclick from 'fastclick'
 
+
 fastclick.attach(document.body)
 Vue.config.productionTip = false
 

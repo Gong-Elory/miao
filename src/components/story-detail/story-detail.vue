@@ -32,11 +32,11 @@
                 </div>
               </div>
             </div>
-          <comment-list :songid="mid" @hasCommentList = "getCommentList"></comment-list>
+            <comment-list :songid="mid" @hasCommentList = "getCommentList" ref="commentPanel" :refresh="isRefresh"></comment-list>
           </div>
         </scroll>
       </div>
-      <comment-box></comment-box>
+      <comment-box @commitComment="refreshComment"></comment-box>
     </div>
   </transition>
 </template>
@@ -51,11 +51,15 @@
     data() {
       return {
         commentList: [],
-        mid: -1
+        mid: -1,
+        offsetTop: 0,
+        isRefresh: -1
       }
     },
     mounted(){
      this.mid = Number(this.$route.params.id)
+     let top = this.$refs.commentPanel.$el.offsetTop
+     this.offsetTop = top
     },
     components: {
       Scroll,
@@ -100,7 +104,16 @@
       },
       getCommentList(commentlist){
         this.commentList = commentlist
+        let top = this.$refs.commentPanel.$el.offsetTop
+        setTimeout(() => {
+          this.$refs.scroll.scrollTo(0, -top, 600)
+        }, 400)
+        this.isRefresh = -1
       },
+      refreshComment() {
+        console.log('saffsadgadfsg')
+        this.isRefresh = this.mid
+      }
     }
   }
 </script>
@@ -141,7 +154,7 @@
         width: 100%;
         text-align: center;
         color: #fff;
-        font-size: 16px;
+        font-size: $font-size-large;
         height: 40px;
         line-height: 40px;
       }
@@ -154,7 +167,7 @@
     .story-wrapper{
       position: absolute;
       top: 40px;
-      height: calc(100% - 70px);
+      height: calc(100% - 90px);
       width: 100%;
       .content-wrapper{
         padding: 10px;

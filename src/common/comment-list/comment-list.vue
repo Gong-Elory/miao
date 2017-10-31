@@ -1,6 +1,7 @@
 <template>
   <div class="comment-wrapper">
     <h1>评论</h1>
+    <loading class="update-first" v-if="!commentList.length"></loading>
     <ul class="coment-list">
       <li class="item" v-for="(item, index) in commentList">
         <div class="custom"><img :src="item.avatar" alt=""></div>
@@ -17,14 +18,22 @@
   import {mapGetters, mapMutations} from 'vuex'
   import {ajax, tips, getSong, formatDate} from 'base/js/util'
   import {MSG_OK} from 'base/js/config'
+  import Loading from 'common/loading/loading'
   export default {
     data() {
       return {
         commentList: []
       }
     },
+    components: {
+      Loading
+    },
     props: {
       songid: {
+        type: Number,
+        default: -1
+      },
+      refresh: {
         type: Number,
         default: -1
       }
@@ -52,16 +61,12 @@
         })
       }
     },
-    computed: {
-      ...mapGetters([
-        'currentSong'
-      ])
-    },
     watch: {
-      currentSong() {
+      songid(newVal) {
         this._getCommentList()
       },
-      songid(newVal) {
+      refresh(newVal) {
+        if(!newVal) return
         this._getCommentList()
       }
     }
@@ -74,7 +79,7 @@
     background-color: #fff;
     padding: 0 10px;
     h1{
-      font-size: 16px;
+      font-size: 14px;
       text-align: left;
       height: 40px;
       line-height: 40px;

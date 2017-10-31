@@ -4,19 +4,27 @@
       <search-box @query="query"></search-box>
     </div>
     <loading v-if="loading" title="正在获取前一天的榜单" class="loading"></loading>
+    <loading v-if="!songList.length" class="first-load" title="正在获取的音乐榜单..."></loading>
     <scroll class="song-wraper" :data="songList" @pullingDown="refreshData" :pullDownRefresh="pullDownRefresh" ref='scroll' @scroll="scroll">
       <ul class="song-list">
         <li class="song-item" v-for="(item,index) in songList" @click="playMusic(item, true)">
-          <div class="song-pic">
-            <img :src="item.songimage" />
+          <div class="date-panel" v-if="item.tab" ref="tabitem">
+            <span>{{item.date}}</span>
           </div>
-          <div class="song-detail">
-            <p class="name" v-text="item.songname"></p>
-            <p class="singer" v-text="item.singer"></p>
-            <!-- <p class="desc" v-text="item.desc" v-show="item.desc"></p> -->
+          <div class="song-panel" v-if="!item.tab">
+            <div class="song-pic">
+              <img :src="item.songimage" />
+            </div>
+            <div class="song-detail">
+              <p class="name" v-text="item.songname"></p>
+              <p class="singer" v-text="item.singer"></p>
+            </div>
           </div>
         </li>
       </ul>
+      <div class="fixed-date date-panel" v-show="!upRefresh" ref="fixedTit">
+        <span>{{fixedDate}}</span>
+      </div>
     </scroll>
     <router-view :query='queryStr'></router-view>
   </div>
@@ -27,7 +35,7 @@
   import axios from 'axios'
   import Loading from 'common/loading/loading'
   import {getSong} from 'base/js/util'
-  import {playlistMixin} from 'base/js/mixin'  
+  import {mapActions, mapGetters, mapMutations} from 'vuex'
 
   const datas = {
     tpl: 3,
@@ -48,19 +56,22 @@
     platform: 'yqq',
     needNewCode: 0
   }
-
+  
+  const MAX_NUM = 9999
   export default {
-    mixins: [playlistMixin],
     data(){
       return {
         songList: [],
         nowIndex: 1,
         pullDownRefresh: {
-          threshold: 60,
+          threshold: 50,
           stop: 30
         },
         loading: false,
-        queryStr: ''
+        queryStr: '',
+        fixedDate: datas.date,
+        topList: [],
+        upRefresh: false
       }
     },
     components: {
@@ -69,7 +80,7 @@
       Loading
     },
     mounted() {
-      this.formatSong()
+     this.formatSong()
     },
     methods: {
       query(queryRes){
@@ -80,6 +91,14 @@
         this.getTopList().then(function(res){
           var songli = res.data.songlist
           var formatedList = []
+          if(datas.date) {
+            // console.log(datas.date)
+            _this.fixedDate = datas.date
+            formatedList.push({
+              tab: true,
+              date: datas.date
+            })
+          }
           for(var i in songli){
             var dirtySong = songli[i].data
             var song = getSong({
@@ -132,6 +151,65 @@
         if(pos.y > 50) {
           this.loading = true;
         }
+        if(pos.y < 29) {
+          this.loading = false;
+        }
+        
+        if(pos.y >= 0) {
+          this.upRefresh = true
+        } else {
+          this.upRefresh = false
+        }
+
+        for(var i=0; i< this.topList.length; i++) {
+          var min = this.topList[i]['top']
+          var max =this.topList[i+1] ? this.topList[i+1]['top'] : min + MAX_NUM
+          var offset = pos.y + max
+          if(Math.abs(offset) < 20 && Math.abs(offset) > 0) {
+            this.$refs.fixedTit.style.top = `${offset - 20}px`
+          }else{
+            this.$refs.fixedTit.style.top = `0`
+          }
+          if( -pos.y > min && -pos.y < max) {
+            return this.fixedDate = this.topList[i]['date']
+          }
+          
+        }
+
+      },
+      ...mapActions([
+        'selectPlay'
+      ]),
+      ...mapMutations({
+        setPlayingFlag: 'SET_PLAYING',
+        setCurrentIndex: 'SET_CURRETN_INDEX',
+        setPlayList: 'SET_PLAYLIST',
+        setSequenceList: 'SET_SEQUENCE_LIST',
+        setFullScreen: 'SET_FULLSCREEN'
+      })
+    },
+    computed: {
+      ...mapGetters([
+        'fullScreen',
+        'playing',
+        'currentIndex',
+        'palylist',
+        'sequenceList',
+        'currentSong'
+      ])
+    },
+    watch: {
+      songList() {
+        setTimeout(() => {
+          let tmp = []
+          this.$refs.tabitem.forEach((item) => {
+            tmp.push({
+              top:item.offsetTop,
+              date: item.innerText
+            })
+          })
+          this.topList = tmp
+        }, 20)
       }
     }
   }
@@ -146,17 +224,31 @@
     width: 100%;
     .loading{
       position: absolute;
-      top: 30px;
+      top: 40px;
     }
     .search-wraper-box{
-      height: 30px;
+      height: 40px;
       width: 100%;
       background-color: rgba(32, 206, 197, 1);
     }
     .song-wraper{
-      height: calc(100% - 30px);
+      height: calc(100% - 40px);
       width: 100%;
       overflow: hidden;
+      position: relative;
+    }
+    .fixed-date{
+        position: absolute;
+        top: 0;
+        background-color: #fff;
+        width: 100%;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .date-panel{
+      font-size: 12px;
+      color: #00BCD4;
+      height: 20px;
+      line-height: 20px;
     }
     .song-list{
       background-color: #fff;
@@ -164,7 +256,7 @@
       .song-item + .song-item{
         border-top: 1px solid #f5f5f5;
       }
-      .song-item{
+      .song-panel{
         box-sizing: content-box;
         height: 50px;
         padding: 5px 0;
