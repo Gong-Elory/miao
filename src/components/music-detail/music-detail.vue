@@ -51,7 +51,6 @@
     created() {
       Bus.$on('updateComentList', (mid) => {  
         this.refresh = mid
-        console.log('hellomid')
       });  
     },
     data(){

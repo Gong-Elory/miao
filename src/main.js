@@ -15,5 +15,6 @@ new Vue({
   el: '#app',
   router,
   store,
+  //给绑定节点渲染一个组件
   render: h => h(App)
 })

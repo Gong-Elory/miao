@@ -40,14 +40,14 @@
   const datas = {
     tpl: 3,
     page: 'detail',
-    date: `${(new Date).getFullYear()}-${(new Date).getMonth() + 1}-${(new Date).getDate()-1}`,
+    date: `${(new Date).getFullYear()}-${(new Date).getMonth() + 1}-${((new Date).getDate()-1 + '').padStart(2, '0')}`,
     topid: 4,
     type: 'top',
     song_begin: 0,
     song_num: 30,
     g_tk: 223580074,
     jsonpCallback: 'MusicJsonCallbacktoplist',
-    loginUin: 0,
+    loginUin: 1010688273,
     hostUin: 0,
     format: 'jsonp',
     inCharset: 'utf8',
@@ -144,7 +144,7 @@
       refreshData(){
         this.nowIndex ++
         let listDatenew = new Date(Date.now() - 86400000 * this.nowIndex)
-        datas.date = `${listDatenew.getFullYear()}-${listDatenew.getMonth() + 1}-${listDatenew.getDate()}`
+        datas.date = `${listDatenew.getFullYear()}-${listDatenew.getMonth() + 1}-${('' + listDatenew.getDate()).padStart(2, '0')}`
         this.formatSong()
       },
       scroll(pos) {

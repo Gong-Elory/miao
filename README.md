@@ -1,6 +1,8 @@
 # miao
 
->  每�你听的每首歌是不是都有一个属于你的故事？
+>  你听的每首歌都有一个属于你的故事？
+>* 目前实现功能：热评加载（数据模拟），音乐播放，点赞、评论，top榜单（在线数据），歌曲搜索
+![](http://oeqcvcrxo.bkt.clouddn.com/hahah.png)
 
 ## Build Setup
 
