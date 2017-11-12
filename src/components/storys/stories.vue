@@ -122,10 +122,12 @@
               let data = JSON.parse(newData)
               if(data.status === MSG_OK) {
                 this._formatStory(data.data.list)
+                console.log(this)
                   Toast({
                   message: `已更新${data.data.list.length}条动态`,
                   position: 'top',
-                  duration: 600,
+                  duration: 1000,
+                  context: this.$el
                 });
                 this.isload = false
               } else {
@@ -133,6 +135,7 @@
                   message: `请求错误`,
                   position: 'top',
                   duration: 1000,
+                  context: this.$el
                 });
               }
             } catch (e) {
@@ -141,6 +144,7 @@
                 message: `出错啦，请重新刷新一下`,
                 position: 'top',
                 duration: 1000,
+                context: this.$el
               });
             }
           }).catch(error => {
@@ -148,6 +152,7 @@
               message: `已经是最新动态了`,
               position: 'top',
               duration: 1500,
+              context: this.$el
             });
           })
           this.isRefresh && this.$refs.scroll.scroll.finishPullDown()
