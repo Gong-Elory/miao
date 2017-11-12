@@ -13,7 +13,7 @@
           </div>
           <div class="song-panel" v-if="!item.tab">
             <div class="song-pic">
-              <img :src="item.songimage" />
+              <img v-lazy="item.songimage" />
             </div>
             <div class="song-detail">
               <p class="name" v-text="item.songname"></p>
